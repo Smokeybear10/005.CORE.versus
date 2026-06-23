@@ -3,289 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V3RSUS — About, How It Works, References</title>
-    <meta name="description" content="About V3RSUS — the team, the methodology, the stack, and references.">
-    <link rel="canonical" href="https://v3rsus.vercel.app/about.html">
-    <meta property="og:title" content="V3RSUS — About">
-    <meta property="og:description" content="About V3RSUS — the team, the methodology, the stack, and references.">
+    <title>Versus — Methodology</title>
+    <meta name="description" content="Data sources, model evaluation, and limitations of Versus matchup research.">
+    <link rel="canonical" href="https://versus.thomasou.com/methodology">
+    <meta property="og:title" content="Versus — Methodology">
+    <meta property="og:description" content="Data sources, model evaluation, and limitations of Versus matchup research.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://v3rsus.vercel.app/about.html">
-    <meta property="og:site_name" content="V3RSUS">
-    <meta property="og:image" content="https://v3rsus.vercel.app/og.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="V3RSUS — About">
-    <meta name="twitter:description" content="About V3RSUS — the team, the methodology, the stack, and references.">
-    <meta name="twitter:image" content="https://v3rsus.vercel.app/og.png">
+    <meta property="og:url" content="https://versus.thomasou.com/methodology">
+    <meta property="og:site_name" content="Versus">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Versus — Methodology">
+    <meta name="twitter:description" content="Data sources, model evaluation, and limitations of Versus matchup research.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="stylesheet" href="home.css">
-    <script src="scroll-anim.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="stylesheet" href="/home.css?v=2c0e32fb88ad">
+    <link rel="stylesheet" href="/workspace.css?v=8ee1463552eb">
+    <script src="/script.js?v=f0691f95bba1" defer></script>
 </head>
-<body>
+<body class="site-page">
 
 <a href="#main" class="skip-link">Skip to main content</a>
 
-<!-- MASTHEAD -->
 <header class="mast">
-    <a href="/" class="mast-brand"><svg class="mast-mark" viewBox="0 0 64 64" aria-hidden="true"><text x="32" y="46" text-anchor="middle" font-family="inherit" font-style="italic" font-size="52" fill="currentColor">Σ</text><rect x="8" y="52" width="24" height="5" fill="#8a1f1f"/><rect x="32" y="52" width="24" height="5" fill="#1a2a47"/></svg>V3RSUS</a>
-    <nav class="mast-nav">
-        <a href="/">Home</a>
-        <a href="predict.html">Predictor</a>
-        <a href="about.html" class="current">About</a>
+    <a href="/" class="mast-brand" aria-label="Versus overview">Versus<span class="brand-context">UFC research</span></a>
+    <nav class="mast-nav" aria-label="Main navigation">
+        <a href="/research">Research</a>
+        <a href="/results">Results</a>
+        <a href="/methodology" class="current" aria-current="page">Methodology</a>
     </nav>
 </header>
 
-
 <main id="main">
 
-<!-- HERO -->
-<section class="hero">
-    <div class="hero-label">
-        <span class="hero-label-sym">&sect;</span>
-        <span class="hero-label-id">0.0</span>
-        <span>Colophon &middot; Who Built This</span>
-    </div>
+<section class="hero page-intro">
+    <div class="hero-label"><span>Methods and sources</span></div>
+    <h1 class="hero-title">Methodology</h1>
+    <p class="hero-standfirst">Where the records come from, how estimates are tested, and what remains uncertain.</p>
+    <nav class="page-contents" aria-label="On this page">
+        <a href="#how-it-works">Fighter data</a>
+        <a href="#model-method">Model estimates</a>
+        <a href="#price-method">Prices and journal</a>
+        <a href="#references">Sources</a>
+    </nav>
+</section>
 
-    <h1 class="hero-title">
-        Thomas Ou,<br>
-        <em>fullstack</em> engineer.
-    </h1>
-
-    <p class="hero-standfirst">
-        I&rsquo;m a Math student at UPenn with a great love for computer science. I particularly like building things at the intersection of data, design, and real problems. V3RSUS started as a class project for CIS 5450 with Aakash Jha and Kevin Jiang and turned into something I wanted to ship.
-    </p>
-
-    <div class="hero-actions">
-        <a href="https://thomasou.com" target="_blank" rel="noopener" class="link-big">Personal site</a>
-        <a href="https://github.com/Smokeybear10" target="_blank" rel="noopener" class="link-big">GitHub</a>
-        <a href="https://www.linkedin.com/in/thomasou0" target="_blank" rel="noopener" class="link-big">LinkedIn</a>
+<section class="spread" id="how-it-works">
+    <div class="spread-head"><div><h2 class="spread-headline">Fighter data</h2></div></div>
+    <div class="prose">
+        <p>The matchup report compares each fighter’s last five recorded UFC bouts, opponents and results. Striking and takedown rates use summed round counts and measured fight time. Percentages include raw attempts; a missing denominator stays unavailable.</p>
+        <p>New records come from a versioned <a href="https://github.com/Greco1899/scrape_ufc_stats">published UFCStats mirror</a>, checked against existing records with source hashes retained. Unresolved identities are excluded. A disputed finish time or round is excluded from duration-based statistics. Importing new research data does not retrain the model.</p>
+        <p>Previous meetings and shared opponents provide context, not a guaranteed winner. Each report identifies incomplete samples, disputed records and its data cutoff.</p>
+        <details class="page-detail">
+            <summary>Additional professional fight history</summary>
+            <p>Earlier results and other promotions come from a pinned <a href="https://github.com/Jadevit/fight-canon-db/releases/tag/db-2026-11-03-2206">Fight Canon snapshot</a>. Fighters are linked by source IDs. Duplicate bouts, unresolved results and known source conflicts are excluded. These partial histories are separate from UFC round statistics and do not establish a complete career record.</p>
+            <p>Historical features use only earlier fight dates, although the source does not establish when every record was first published. Adding 12 career-history measures reduced accuracy from 64.1% to 63.1% on the same 985-fight historical replay and slightly worsened probability error. These records remain available for research; matchup estimates still use the corrected UFC model.</p>
+        </details>
     </div>
 </section>
 
-
-<!-- § 1.0 — THE TEAM -->
-<section class="spread reveal">
-    <div class="spread-head">
-        <div class="spread-num">1.0</div>
-        <div>
-            <h2 class="spread-headline">The <em>team.</em></h2>
-            <div class="spread-sub">CIS 5450 &middot; Big Data Analytics &middot; University of Pennsylvania</div>
-        </div>
-    </div>
-
-    <div class="spread-body">
-        <span>&sect; roster</span>
-        <div class="team-grid">
-            <div class="team-card">
-                <div class="team-role">Author</div>
-                <div class="team-name">Thomas Ou</div>
-                <div class="team-note">Site, ML engineering, frontend, data pipeline.</div>
-            </div>
-            <div class="team-card">
-                <div class="team-role">Research Partner</div>
-                <div class="team-name">Aakash Jha</div>
-                <div class="team-note">Feature engineering, model training, analysis.</div>
-            </div>
-            <div class="team-card">
-                <div class="team-role">Research Partner</div>
-                <div class="team-name">Kevin Jiang</div>
-                <div class="team-note">Data pipeline, exploratory analysis.</div>
-            </div>
-        </div>
+<section class="spread" id="model-method">
+    <div class="spread-head"><div><h2 class="spread-headline">Model estimates</h2></div></div>
+    <div class="prose">
+        <p>An estimate needs a fight date, division, three or five scheduled rounds, and title-bout status. The model uses earlier fights, recent measured performance, age, layoff and opponent-adjusted ratings. A hypothetical matchup is not a scheduled event.</p>
+        <p>Unsupported divisions, inadequate history and untested extreme confidence cause the model to decline an estimate. Dates are limited to one year after the research cutoff. Known ages or layoffs outside the observed training range are also declined.</p>
+        <p>The <a href="/results#forecast-evaluation">published replay</a> covers 2025–2026 fights after training and calibration. Those outcomes were already examined during development, so this is not independent validation. No reliable 90% confidence band or advantage over market prices has been established.</p>
+        <details class="page-detail">
+            <summary>Training and evaluation protocol</summary>
+            <p>The candidate was selected using an earlier development period, fitted on 2010–2022 fights and probability-calibrated on separate 2023–2024 fights. Preprocessing is fitted on training data only. Both corner orders are averaged before calibration, so swapping fighters preserves their probabilities.</p>
+            <p>Draws and no contests are excluded from the binary target but retained in historical context. Replay accuracy includes all eligible decisive bouts before the app’s matchup restrictions.</p>
+            <p>The model was refitted after correcting records that merged fighters with identical names. The original project’s classifiers still have those identity errors and no longer produce app estimates. Their <a href="/results#evaluation">archived scores</a> report random-split and chronological cross-validation; preprocessing was fitted before those splits, so they are not independent holdout estimates. The original combined prediction after averaging corner orders was not independently evaluated or calibrated.</p>
+        </details>
+        <p>Current injuries, training camps and weight-cut conditions are not model inputs. A hypothetical matchup may also differ from the combinations represented in training.</p>
     </div>
 </section>
 
-
-<!-- § 2.0 — HOW IT WORKS -->
-<section class="spread reveal" id="how-it-works">
-    <div class="spread-head">
-        <div class="spread-num">2.0</div>
-        <div>
-            <h2 class="spread-headline">How it <em>works.</em></h2>
-            <div class="spread-sub">from raw stats to a calibrated probability &middot; in plain english</div>
-        </div>
+<section class="spread" id="price-method">
+    <div class="spread-head"><div><h2 class="spread-headline">Prices and journal</h2></div></div>
+    <div class="prose">
+        <h3 class="sub-head">Price comparison</h3>
+        <p>Enter both moneylines from one bookmaker in American or decimal format. Compare your own probability estimate or the research model with the quote’s break-even probability and the two-sided market baseline after normalizing out the bookmaker’s margin.</p>
+        <p>Expected return per unit depends on the probability estimate being correct. It is not evidence of a betting edge. No live price feed is connected by default; an optional The Odds API connection loads upcoming two-outcome markets on request. Every quote has a source and observation time.</p>
+        <h3 class="sub-head">Your decision record</h3>
+        <p>The journal saves the quoted odds, estimate, stake, reasoning and time. You enter outcomes to calculate net result and return on settled stake. Entries stay in this browser and can be exported as CSV; they do not sync across devices. This is a personal record, not a verified performance history.</p>
     </div>
+</section>
 
-    <div class="spread-body">
-        <span>&sect; method</span>
+<section class="spread" id="references">
+    <div class="spread-head"><div><h2 class="spread-headline">Code and data sources</h2></div></div>
+    <ol class="refs">
+        <li><a href="https://github.com/Smokeybear10/005.CORE.versus">Versus source code</a> — interface, API and prediction engine.</li>
+        <li><a href="https://github.com/Smokeybear10/802-DATA.MMA">MMA data pipeline</a> — preparation, training and release artifacts.</li>
+        <li><a href="https://github.com/Greco1899/scrape_ufc_stats">Published UFCStats mirror</a> — versioned UFC records and round statistics.</li>
+        <li><a href="https://github.com/Jadevit/fight-canon-db">Fight Canon</a> — additional professional fight histories, compiled by Jaden Pain.</li>
+    </ol>
+</section>
+
+<section class="spread detail-section">
+    <details class="page-detail">
+        <summary>Implementation and project credits</summary>
         <div class="prose">
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.1 &mdash; The stats</span>
-                Not head to head.
-            </h3>
-            <p>
-                <strong>The most important thing to understand:</strong> when you select Khabib vs. McGregor, Khabib&rsquo;s <em>5.3 takedowns per fight</em> is his average across his <strong>entire career</strong> &mdash; against Iaquinta, Barboza, Johnson, everyone. Not specifically against McGregor.
-            </p>
-            <p>
-                So the model answers: <em>&ldquo;Given how each fighter performs across all opponents, what does the gap between their profiles predict?&rdquo;</em> It&rsquo;s also what makes hypothetical matchups between fighters who never met possible.
-            </p>
-
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.2 &mdash; The features</span>
-                It&rsquo;s about the gap.
-            </h3>
-            <p>
-                Instead of feeding raw stats for both fighters, we compute the <em>difference</em> for each stat. &ldquo;Fighter A has 5.3 takedowns per fight, Fighter B has 2.1&rdquo; becomes a single number: <strong>+3.2</strong>. This halves the data and directly encodes who has the edge on each dimension.
-            </p>
-            <div class="meth-formula"><span>diff</span> = Fighter 1&rsquo;s stat &minus; Fighter 2&rsquo;s stat</div>
-            <p>
-                Positive means Fighter 1 has the edge. Negative means Fighter 2. The pipeline produces 86 such features across <strong>striking</strong>, <strong>grappling</strong>, <strong>physical attributes</strong>, <strong>experience / momentum</strong>, and <strong>opponent quality</strong>.
-            </p>
-
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.3 &mdash; The ensemble</span>
-                Three models, one vote.
-            </h3>
-            <p>
-                Each algorithm has blind spots. Logistic regression misses complex interactions. Random forest can overfit to noise. Gradient boosting can be overconfident. By averaging all three &mdash; plus XGBoost and SVM in the extended v3.2 ensemble &mdash; we get a prediction that&rsquo;s more stable than any single model. When they all agree, trust is high. When they diverge wildly, the fight is genuinely hard to call.
-            </p>
-            <div class="meth-formula"><span>P(win)</span> = (1 / 5) &times; &Sigma;<sub>i</sub> P<sub>i</sub>(win | x)</div>
-
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.4 &mdash; The pipeline</span>
-                Anatomy of a prediction.
-            </h3>
-            <p>
-                When you hit <em>Run</em>, five things happen in sequence:
-            </p>
-            <ol class="numbered-list">
-                <li><span>Look up each fighter&rsquo;s most recent career-wide stats from the dataset.</span></li>
-                <li><span>Subtract Fighter 2&rsquo;s stats from Fighter 1&rsquo;s across all 86 features to get a <em>difference profile</em>.</span></li>
-                <li><span>Scale each gap relative to the training data so all features sit on the same playing field.</span></li>
-                <li><span>Five models independently return a win probability. Their mean becomes the final prediction.</span></li>
-                <li><span>The explanation engine decomposes the result into SHAP attributions, category-level edges, and nearest neighbors.</span></li>
-            </ol>
-
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.5 &mdash; The explanation</span>
-                Why, in three layers.
-            </h3>
-            <p>
-                Every prediction comes with three layers of reasoning so you can judge it yourself:
-            </p>
-            <ul class="lettered-list">
-                <li><span><em>Key factors.</em> We decompose the ensemble mean into per-feature contributions (SHAP values). Each stat gap gets a score showing how much it pushed the prediction toward one fighter, ranked with both fighters&rsquo; raw values shown.</span></li>
-                <li><span><em>Edge analysis.</em> We group all features into four domains (striking, grappling, physical, experience) and average each group&rsquo;s contribution into a 0&ndash;100 score. 50 = dead even. Above 55 strongly favors Fighter 1. Below 45 strongly favors Fighter 2.</span></li>
-                <li><span><em>Model consensus.</em> Each classifier&rsquo;s vote is shown individually. If they line up (66%, 63%, 61%) the prediction is stable. If they diverge (70%, 45%, 55%) the fight is genuinely unpredictable and the result deserves a grain of salt.</span></li>
-            </ul>
-
-
-            <h3 class="sub-head">
-                <span class="tag">&sect; 2.6 &mdash; The honest bit</span>
-                How accurate is it, really?
-            </h3>
-            <p>
-                <strong>68.4%</strong> on held-out 2022&ndash;2024 fights (n=1,284). For context: a random guess sits at 50%. Always picking the red corner hits 54%. Vegas closing lines sit at roughly 65&ndash;70%, with access to camp reports, injury intel, and weight-cut whispers we don&rsquo;t have. Academic ML studies on UFC consistently land in the 58&ndash;68% range.
-            </p>
-            <p>
-                <strong>MMA is chaotic.</strong> One punch can end any fight regardless of stats. 68% means the stats explain more than half the story. The rest is heart, timing, and luck.
-            </p>
-
+            <p>Flask serves the Python API. scikit-learn provides classifiers and preprocessing; pandas and NumPy handle data and feature calculations. The interface uses HTML, CSS and JavaScript, with IBM Plex Sans and IBM Plex Mono. Vercel hosts the site and API.</p>
+            <p>Originally built for CIS 5450 at the University of Pennsylvania by <a href="https://thomasou.com">Thomas Ou</a>, Aakash Jha and Kevin Jiang. <a href="https://github.com/Smokeybear10">Thomas’s GitHub</a>.</p>
         </div>
-    </div>
+    </details>
 </section>
-
-
-<!-- § 3.0 — THE STACK -->
-<section class="spread dark reveal">
-    <div class="dark-inner">
-        <div class="spread-head">
-            <div class="spread-num">3.0</div>
-            <div>
-                <h2 class="spread-headline">The <em>stack.</em></h2>
-                <div class="spread-sub">what it&rsquo;s built on &middot; end to end</div>
-            </div>
-        </div>
-
-        <div class="spread-body">
-            <span>&sect; infra</span>
-            <div class="meth">
-                <div class="meth-col">
-                    <div class="meth-col-label">I &mdash; Backend &amp; ML</div>
-                    <ul class="meth-list">
-                        <li><span><b>Python 3.11</b> &middot; Flask &middot; Flask-CORS</span></li>
-                        <li><span><b>scikit-learn</b> &middot; LogReg &middot; Random Forest &middot; Gradient Boosting</span></li>
-                        <li><span><b>pandas</b> + <b>numpy</b> for the feature pipeline</span></li>
-                        <li><span>Trained on 6,582 UFC fights (2001&ndash;2024)</span></li>
-                        <li><span>Hosted on Vercel serverless Python</span></li>
-                    </ul>
-                </div>
-                <div class="meth-col">
-                    <div class="meth-col-label">II &mdash; Frontend &amp; Deploy</div>
-                    <ul class="meth-list">
-                        <li><span><b>Vanilla HTML / CSS / JS</b> &mdash; no framework</span></li>
-                        <li><span>Instrument Serif &middot; Inter Tight &middot; IBM Plex Mono</span></li>
-                        <li><span>Static assets over Vercel CDN</span></li>
-                        <li><span>GitHub Actions for CI</span></li>
-                        <li><span>No tracking &middot; no analytics &middot; no cookies</span></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- § 4.0 — REFERENCES -->
-<section class="spread reveal" id="references">
-    <div class="spread-head">
-        <div class="spread-num">4.0</div>
-        <div>
-            <h2 class="spread-headline"><em>References.</em></h2>
-            <div class="spread-sub">cited in the paper &middot; prior work we built on</div>
-        </div>
-    </div>
-
-    <div class="spread-body">
-        <span>&sect; cited</span>
-        <ol class="refs">
-            <li>Brier, G. W. (1950). Verification of forecasts expressed in terms of probability. <em>Monthly Weather Review</em>, 78(1), 1&ndash;3.</li>
-            <li>Breiman, L. (2001). Random Forests. <em>Machine Learning</em>, 45(1), 5&ndash;32.</li>
-            <li>Chen, T., &amp; Guestrin, C. (2016). XGBoost: A scalable tree boosting system. <em>Proc. 22nd ACM SIGKDD</em>, 785&ndash;794.</li>
-            <li>Cox, D. R. (1958). The regression analysis of binary sequences. <em>JRSS: Series B</em>, 20(2), 215&ndash;232.</li>
-            <li>Dietterich, T. G. (2000). Ensemble methods in machine learning. <em>Multiple Classifier Systems</em>, 1857, 1&ndash;15.</li>
-            <li>Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. <em>Annals of Statistics</em>, 29(5), 1189&ndash;1232.</li>
-            <li>Gneiting, T., &amp; Raftery, A. E. (2007). Strictly proper scoring rules, prediction, and estimation. <em>JASA</em>, 102(477), 359&ndash;378.</li>
-            <li>Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). <em>The Elements of Statistical Learning</em>. Springer.</li>
-            <li>Ke, G., et al. (2017). LightGBM: A highly efficient gradient boosting decision tree. <em>NeurIPS</em>, 30.</li>
-            <li>Lundberg, S. M., &amp; Lee, S. I. (2017). A unified approach to interpreting model predictions. <em>NeurIPS</em>, 30.</li>
-            <li>Pedregosa, F. et al. (2011). Scikit-learn: Machine learning in Python. <em>JMLR</em>, 12, 2825&ndash;2830.</li>
-            <li>Platt, J. C. (1999). Probabilistic outputs for support vector machines. <em>Advances in Large Margin Classifiers</em>. MIT Press.</li>
-        </ol>
-    </div>
-</section>
-
 
 </main>
 
-
-<!-- COLOPHON -->
-<aside class="colophon">
-    <span class="colophon-tag">&sect; contact</span>
-    <div class="colophon-body">
-        <p>Source is on <a href="https://github.com/Smokeybear10/102-RSCH.V3RSUS" target="_blank" rel="noopener">GitHub</a>. Fork it, file issues, send PRs.</p>
-    </div>
-</aside>
-
-
-<!-- FOOTER -->
 <footer>
+    <div><b>Versus</b> &middot; Thomas Ou &middot; Aakash Jha &middot; Kevin Jiang</div>
     <div>
-        <b>V3RSUS</b> &middot; 2026 &middot; Thomas Ou &middot; Aakash Jha &middot; Kevin Jiang
-    </div>
-    <div>
-        <a href="/">Home</a>
-        <a href="predict.html">Predictor</a>
-        <a href="https://github.com/Smokeybear10/102-RSCH.V3RSUS">GitHub</a>
+        <a href="/research">Research</a>
+        <a href="/results">Results</a>
+        <a href="/methodology">Methodology</a>
+        <a href="https://github.com/Smokeybear10/005.CORE.versus">GitHub</a>
     </div>
 </footer>
 

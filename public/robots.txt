@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://v3rsus.vercel.app/sitemap.xml
+Sitemap: https://versus.thomasou.com/sitemap.xml

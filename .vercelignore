@@ -1,11 +1,22 @@
 # Local-only
 .venv/
 .DS_Store
+.git/
+.gstack/
+.claude/
+.env
+.env.*
+!.env.example
+
+# Runtime data is fetched and verified during the build.
+data/
+public/evaluation.json
 
 # Notebooks + research artifacts (not needed at runtime)
 notebooks/
 plans/
 docs/
+tests/
 
 # Local pycache
 **/__pycache__/

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Results — Versus</title>
+    <meta name="description" content="Historical results, calibration and data limitations for the Versus UFC research model.">
+    <link rel="canonical" href="https://versus.thomasou.com/results">
+    <meta property="og:title" content="Model Results — Versus">
+    <meta property="og:description" content="Historical results, calibration and data limitations for the Versus UFC research model.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://versus.thomasou.com/results">
+    <meta property="og:site_name" content="Versus">
+    <meta name="twitter:card" content="summary">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="stylesheet" href="/home.css?v=2c0e32fb88ad">
+    <link rel="stylesheet" href="/workspace.css?v=8ee1463552eb">
+    <script src="/evaluation-ui.js?v=d138124f2481" type="module"></script>
+    <style>
+        .results-page main { max-width: 1100px; }
+        .results-page [hidden] { display: none !important; }
+        .results-page .mast-brand { min-height: 44px; }
+        .results-header { padding: 52px 0 32px; }
+        .results-eyebrow { color: var(--ink-mid); font: 500 11px/1.5 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+        .results-header h1 { margin-top: 14px; font-size: clamp(36px, 4vw, 48px); font-weight: 500; line-height: 1.2; letter-spacing: -1.6px; }
+        .results-header > p:last-child { margin-top: 14px; max-width: 65ch; color: var(--ink-mid); font-size: 17px; line-height: 1.7; }
+        .results-section { padding: 30px 0; border-top: 1px solid var(--rule); }
+        .results-section h2 { font-size: 23px; font-weight: 500; letter-spacing: -.5px; line-height: 1.35; }
+        .results-section > p { margin-top: 10px; max-width: 80ch; color: var(--ink-mid); font-size: 14px; line-height: 1.8; }
+        .results-context { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
+        .results-context > p { font-size: 12px; color: var(--ink-mid); }
+        .results-caveat { margin: 22px 0; border-left: 2px solid #b5c3d0; padding: 16px 20px; background: var(--surface); }
+        .results-caveat p { font-size: 14px; color: var(--ink-soft); line-height: 1.8; }
+        .results-metrics { display: grid; grid-template-columns: repeat(4, 1fr); padding: 20px 0; border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft); }
+        .results-metrics > div { padding: 0 22px; border-right: 1px solid var(--rule-soft); }
+        .results-metrics > div:first-child { padding-left: 0; }
+        .results-metrics > div:last-child { border: 0; }
+        .results-metrics dt { color: var(--ink-mid); font-size: 12px; }
+        .results-metrics dd { margin-top: 6px; font-size: 29px; font-weight: 500; letter-spacing: -.8px; font-variant-numeric: tabular-nums; }
+        .results-metrics small { display: block; margin-top: 5px; color: var(--ink-mid); font-size: 11px; font-weight: 400; letter-spacing: 0; }
+        .results-caption { margin-top: 16px; color: var(--ink-mid); font-size: 12px; line-height: 1.8; }
+        .results-data-link, .results-retry { display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; }
+        .results-retry { margin-right: 20px; border: 0; padding: 0; color: var(--indigo); background: none; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+        .results-table { width: 100%; margin-top: 22px; border-collapse: collapse; font-size: 14px; }
+        .results-table caption { text-align: left; margin-bottom: 12px; font-size: 12px; color: var(--ink-mid); }
+        .results-table th, .results-table td { padding: 13px 10px; text-align: right; border-bottom: 1px solid var(--rule-soft); font-variant-numeric: tabular-nums; }
+        .results-table th { font-weight: 500; }
+        .results-table thead th { border-bottom-color: var(--rule); color: var(--ink-mid); font-size: 12px; }
+        .results-table th:first-child, .results-table td:first-child { text-align: left; padding-left: 0; }
+        .results-table th:last-child, .results-table td:last-child { padding-right: 0; }
+        .results-table .results-no-sample { color: var(--ink-faint); }
+        .results-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+        .results-columns h3 { margin-top: 22px; font-size: 14px; font-weight: 500; }
+        .results-columns p { margin-top: 6px; font-size: 14px; color: var(--ink-mid); line-height: 1.8; }
+        .results-protocol { margin-top: 12px; }
+        .results-protocol > div { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--rule-soft); }
+        .results-protocol dt { color: var(--ink-soft); font-size: 13px; }
+        .results-protocol dd { color: var(--ink-mid); font-size: 12px; text-align: right; }
+        .results-protocol dd span:not([data-evaluation-field]) { display: block; margin-top: 4px; }
+        .results-fingerprint { overflow-wrap: anywhere; color: var(--ink-mid); font: 400 11px/1.8 var(--mono); }
+        .results-limitations { margin: 14px 0 0 19px; max-width: 90ch; color: var(--ink-mid); font-size: 14px; line-height: 1.8; }
+        .results-limitations li + li { margin-top: 7px; }
+        .results-archive { margin: 8px 0 40px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+        .results-archive summary { padding: 20px 0; min-height: 60px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .results-archive summary span { margin-left: 12px; color: var(--ink-mid); font-size: 12px; font-weight: 400; }
+        .results-archive-content { padding: 0 0 24px; }
+        .results-archive-content > p { font-size: 13px; line-height: 1.8; color: var(--ink-mid); max-width: 85ch; }
+        .results-archive .results-table { margin-top: 16px; }
+        .results-footer-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+        .results-page footer a { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; }
+        .results-footer-brand { color: var(--ink); font-size: 18px; font-weight: 600; letter-spacing: -.5px; text-decoration: none; }
+        #confidence-audit { color: var(--ink-mid); font-size: 14px; line-height: 1.8; }
+        @media (max-width: 700px) {
+            .results-header { padding: 36px 0 26px; }
+            .results-header > p:last-child { font-size: 16px; }
+            .results-context { flex-direction: column; gap: 7px; }
+            .results-metrics { grid-template-columns: 1fr 1fr; row-gap: 20px; }
+            .results-metrics > div { padding: 0 16px; }
+            .results-metrics > div:nth-child(odd) { padding-left: 0; }
+            .results-metrics > div:nth-child(even) { border: 0; }
+            .results-metrics dd { font-size: 27px; }
+            .results-columns { grid-template-columns: 1fr; gap: 28px; }
+            .results-table { font-size: 12px; }
+            .results-table th, .results-table td { padding: 12px 6px; }
+            .results-table thead th { font-size: 11px; }
+            .results-caveat { padding: 14px 16px; }
+            .results-archive summary span { display: block; margin: 4px 0 0 16px; }
+            .results-page footer { flex-direction: column; gap: 6px; }
+            .results-footer-nav { gap: 0 20px; }
+        }
+    </style>
+</head>
+<body class="site-page results-page">
+<a href="#main" class="skip-link">Skip to main content</a>
+<header class="mast">
+    <a href="/" class="mast-brand" aria-label="Versus home">Versus<span class="brand-context">UFC research</span></a>
+    <nav class="mast-nav" aria-label="Main navigation"><a href="/research">Research</a><a href="/results" class="current" aria-current="page">Results</a><a href="/methodology">Methodology</a></nav>
+</header>
+<main id="main">
+    <header class="results-header"><p class="results-eyebrow">Evaluation</p><h1>Model results</h1><p>Historical performance, data coverage and the limits of the estimates used in the research workspace.</p></header>
+    <section class="results-section" id="forecast-evaluation" aria-labelledby="replay-heading">
+        <div class="results-context"><h2 id="replay-heading">Historical replay</h2><p id="evaluation-generated"></p></div>
+        <div class="results-caveat"><p>These fight outcomes were already examined during development. Replaying them with corrected fighter records is useful for checking the model, but it is not independent validation.</p></div>
+        <div id="confidence-audit" role="status">Loading the evaluation for the research model…</div>
+        <button type="button" id="evaluation-retry" class="results-retry" hidden>Try again</button>
+        <div id="evaluation-summary" hidden>
+            <dl class="results-metrics">
+                <div><dt>Winner accuracy</dt><dd data-evaluation-field="accuracy">—</dd><small>Across the replay sample</small></div>
+                <div><dt>Brier score</dt><dd data-evaluation-field="brier">—</dd><small>Probability error; lower is better</small></div>
+                <div><dt>Fights evaluated</dt><dd data-evaluation-field="fightCount">—</dd><small>Decisive, identified bouts</small></div>
+                <div><dt>Events</dt><dd data-evaluation-field="eventCount">—</dd><small>Represented in the sample</small></div>
+            </dl>
+            <p id="evaluation-uncertainty" class="results-caption"></p>
+            <a class="results-data-link" href="/api/evaluation" download="versus-evaluation.json">Download the full evaluation →</a>
+        </div>
+        <noscript><p class="results-caption">Enable JavaScript to load the scores, or <a href="/api/evaluation">read the evaluation data</a>.</p></noscript>
+    </section>
+
+    <section class="results-section" id="calibration-section" aria-labelledby="calibration-heading" hidden>
+        <h2 id="calibration-heading">Did the probabilities match the outcomes?</h2>
+        <p>Each row groups fights by the model’s probability for its chosen fighter. Compare the average estimate with how often that fighter actually won.</p>
+        <table class="results-table"><caption>Confidence groups in the historical replay</caption><thead><tr><th scope="col">Confidence</th><th scope="col">Fights</th><th scope="col">Mean estimate</th><th scope="col">Won</th></tr></thead><tbody id="calibration-rows"></tbody></table>
+        <p class="results-caption" id="calibration-note"></p>
+    </section>
+
+    <section class="results-section results-columns" aria-labelledby="protocol-heading">
+        <div><h2 id="protocol-heading">How the data is divided</h2><dl class="results-protocol"><div><dt>Training</dt><dd id="evaluation-training">Loading…</dd></div><div><dt>Calibration</dt><dd id="evaluation-calibration">Loading…</dd></div><div><dt>Model inputs</dt><dd><span data-evaluation-field="featureCount">—</span> features</dd></div></dl><p>Training fits the model. Calibration adjusts its probabilities on a separate period. The historical replay uses later fights whose outcomes have already been inspected.</p></div>
+        <div><h2>Research coverage</h2><dl class="results-protocol"><div><dt>Records through</dt><dd data-research-field="dataThrough">Loading…</dd></div><div><dt>Fighters in lookup</dt><dd data-research-field="fighterCount">—</dd></div></dl><p id="research-info-status" role="status">Loading the current research coverage…</p><h3>Coverage is different from evaluation</h3><p>The research dataset can include newer records than a saved test. Each matchup report shows the fight history and sample available for those fighters.</p></div>
+    </section>
+
+    <section class="results-section" aria-labelledby="limits-heading"><h2 id="limits-heading">What remains unproven</h2><p>Historical accuracy does not establish an advantage over market prices. There is no demonstrated betting edge, and current injuries, camps and late changes are not fully captured by fight records.</p><ul class="results-limitations" id="evaluation-limitations"><li>Future performance needs predictions recorded before the outcomes are known.</li><li>Historical source snapshots may contain information revised after a fight.</li><li>Small groups of high-confidence predictions cannot establish reliable high-confidence performance.</li></ul><a class="results-data-link" href="/methodology">Read the methodology →</a><p class="results-fingerprint" id="evaluation-fingerprint"></p></section>
+
+    <details class="results-archive" id="legacy-evaluation"><summary>Earlier project models <span>Archived diagnostics</span></summary><div class="results-archive-content" id="evaluation"><p>These are stored scores from the original project classifiers. They do not evaluate the corrected model used above. Preprocessing was fitted before cross-validation, so these scores are not independent holdout estimates.</p><table class="results-table"><caption>Original classifiers · classification accuracy</caption><thead><tr><th scope="col">Model</th><th scope="col">Random-split CV</th><th scope="col">Chronological CV</th></tr></thead><tbody id="model-evaluation"><tr><td colspan="3">Loading archived scores…</td></tr></tbody></table><p id="model-info-status" class="results-caption" role="status"></p></div></details>
+</main>
+<footer><div><a class="results-footer-brand" href="/">Versus</a><span>UFC matchup research</span></div><nav class="results-footer-nav" aria-label="Footer navigation"><a href="/research">Research</a><a href="/results" aria-current="page">Results</a><a href="/methodology">Methodology</a><a href="https://github.com/Smokeybear10/005.CORE.versus" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></nav></footer>
+</body>
+</html>

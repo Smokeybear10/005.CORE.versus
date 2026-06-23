@@ -3,78 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V3RSUS — Fight Outcome Predictor</title>
-    <meta name="description" content="Ensemble machine learning fight outcome predictor — UFC 2001–2024.">
-    <link rel="canonical" href="https://v3rsus.vercel.app/predict.html">
-    <meta property="og:title" content="V3RSUS — Fight Outcome Predictor">
-    <meta property="og:description" content="Ensemble machine learning fight outcome predictor — UFC 2001–2024.">
+    <title>Matchup research · Versus</title>
+    <meta name="description" content="Compare UFC fighters and bookmaker prices. Save your probability estimates, reasoning and results in a personal research journal.">
+    <link rel="canonical" href="https://versus.thomasou.com/research">
+    <meta property="og:title" content="Matchup research · Versus">
+    <meta property="og:description" content="Compare UFC fighters and bookmaker prices. Save your probability estimates, reasoning and results in a personal research journal.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://v3rsus.vercel.app/predict.html">
-    <meta property="og:site_name" content="V3RSUS">
-    <meta property="og:image" content="https://v3rsus.vercel.app/og.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="V3RSUS — Fight Outcome Predictor">
-    <meta name="twitter:description" content="Ensemble machine learning fight outcome predictor — UFC 2001–2024.">
-    <meta name="twitter:image" content="https://v3rsus.vercel.app/og.png">
+    <meta property="og:url" content="https://versus.thomasou.com/research">
+    <meta property="og:site_name" content="Versus">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Matchup research · Versus">
+    <meta name="twitter:description" content="Compare UFC fighters and bookmaker prices. Save your probability estimates, reasoning and results in a personal research journal.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/svg+xml" href="icon.svg">
-    <link rel="stylesheet" href="home.css">
-    <link rel="stylesheet" href="predict.css">
-    <script src="script.js" defer></script>
-    <script src="scroll-anim.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
+    <link rel="stylesheet" href="/home.css?v=2c0e32fb88ad">
+    <link rel="stylesheet" href="/predict.css?v=f2887fd2c24e">
+    <link rel="stylesheet" href="/research.css?v=cc07f529e891">
+    <link rel="stylesheet" href="/workspace.css?v=8ee1463552eb">
+    <script src="/script.js?v=f0691f95bba1" defer></script>
+    <script src="/research-ui.js?v=1b8d5be1ad91" type="module"></script>
+    <script src="/matchup-ui.js?v=cd65a320b672" type="module"></script>
+    <script src="/forecast-ui.js?v=dad568f6f7d2" type="module"></script>
+    <script src="/workspace-ui.js?v=a42d8c898aae" type="module"></script>
 </head>
-<body>
+<body class="workspace-page">
 
 <a href="#main" class="skip-link">Skip to main content</a>
 
 <!-- MASTHEAD -->
 <header class="mast">
-    <a href="/" class="mast-brand"><svg class="mast-mark" viewBox="0 0 64 64" aria-hidden="true"><text x="32" y="46" text-anchor="middle" font-family="inherit" font-style="italic" font-size="52" fill="currentColor">Σ</text><rect x="8" y="52" width="24" height="5" fill="#8a1f1f"/><rect x="32" y="52" width="24" height="5" fill="#1a2a47"/></svg>V3RSUS</a>
-    <nav class="mast-nav">
-        <a href="/">Home</a>
-        <a href="predict.html" class="current">Predictor</a>
-        <a href="about.html">About</a>
+    <a href="/" class="mast-brand">Versus<span class="brand-context">UFC research</span></a>
+    <nav class="mast-nav" aria-label="Main navigation">
+        <a href="/research" class="current" aria-current="page">Research</a>
+        <a href="/results">Results</a>
+        <a href="/methodology">Methodology</a>
     </nav>
 </header>
 
 
 <!-- HERO -->
-<section class="hero predict-hero">
-    <div class="hero-label">
-        <span class="hero-label-sym">&sect;</span>
-        <span class="hero-label-id">A.0</span>
-        <span>Interactive Supplement &middot; Appendix A</span>
+<main id="main">
+<section class="hero predict-hero research-hero workspace-query" aria-labelledby="research-title">
+    <div class="workspace-intro">
+        <div><h1 id="research-title" class="hero-title">Matchup research</h1>
+        <p class="hero-standfirst">Compare UFC form, statistics and fight history.</p></div>
+        <p id="research-data-status" class="data-status" role="status">Checking data coverage…</p>
+    </div>
+    <!-- FORM -->
+    <form class="form" id="matchup-form" novalidate>
+        <div class="form-tag">Matchup</div>
+        <div class="form-right">
+            <div class="form-inner">
+                <div class="form-field">
+                    <label for="fighter1">First fighter</label>
+                    <div class="input-wrap">
+                        <input type="text" id="fighter1" aria-describedby="form-error" disabled placeholder="e.g. Alex Pereira" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="autocomplete1">
+                        <ul class="autocomplete-list hidden" id="autocomplete1" role="listbox" aria-label="Fighter suggestions"></ul>
+                    </div>
+                </div>
+                <div class="form-vs" aria-hidden="true">vs</div>
+                <div class="form-field">
+                    <label for="fighter2">Second fighter</label>
+                    <div class="input-wrap">
+                        <input type="text" id="fighter2" aria-describedby="form-error" disabled placeholder="e.g. Magomed Ankalaev" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="autocomplete2">
+                        <ul class="autocomplete-list hidden" id="autocomplete2" role="listbox" aria-label="Fighter suggestions"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button id="predict-btn" type="submit" class="run-btn" disabled>
+                    <span class="btn-text">Compare fighters</span>
+                </button>
+            </div>
+            <div class="query-example"><span>Start with an example</span><button id="example-matchup" type="button" class="example-matchup" disabled>Volkanovski vs. Lopes <span aria-hidden="true">↗</span></button></div>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <p id="form-status" class="form-status" role="status"></p>
+            <button type="button" id="retry-fighters" class="retry-btn" hidden>Retry loading fighters</button>
+            <noscript><p>Enable JavaScript to compare fighters and use the research tools.</p></noscript>
+        </div>
+    </form>
+
+</section>
+
+
+
+<section class="workspace" aria-label="Matchup workspace">
+    <div class="workspace-toolbar">
+        <div id="workspace-navigation" class="workspace-tabs" role="tablist" aria-label="Research tools">
+            <button type="button" id="tab-report" role="tab" data-workspace-tab="report" aria-selected="true" aria-controls="view-report">Report</button>
+            <button type="button" id="tab-estimate" role="tab" data-workspace-tab="estimate" aria-selected="false" aria-controls="view-estimate" tabindex="-1">Estimate</button>
+            <button type="button" id="tab-prices" role="tab" data-workspace-tab="prices" aria-selected="false" aria-controls="view-prices" tabindex="-1">Prices</button>
+            <button type="button" id="tab-journal" role="tab" data-workspace-tab="journal" aria-selected="false" aria-controls="view-journal" tabindex="-1">Journal <span id="journal-count"></span></button>
+        </div>
+        <button id="share-matchup" type="button" class="quiet-button share-button" aria-label="Copy matchup link" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg><span>Copy matchup link</span></button>
+    </div>
+    <div class="workspace-context"><span id="workspace-selection">No matchup selected</span><span id="share-status" role="status"></span><input id="share-link" type="url" readonly hidden aria-label="Matchup link"></div>
+    <div id="workspace-empty" class="workspace-empty">
+        <span class="eyebrow">Your matchup report</span>
+        <h2 id="workspace-empty-title">Start with two fighters.</h2>
+        <p id="workspace-empty-description">Choose names above or load the example. The report brings their recent fights, statistics and shared opponents into one view.</p>
     </div>
 
-    <h1 class="hero-title">
-        Fight outcome<br>
-        <em>predictor.</em>
-    </h1>
+<div id="view-report" data-workspace-panel="report" role="tabpanel" aria-labelledby="tab-report" tabindex="0">
+<section id="matchup-research" class="research-panel matchup-panel" aria-labelledby="matchup-heading" hidden>
+    <header class="research-heading report-heading"><h2 id="matchup-heading">Matchup report</h2><p id="evidence-coverage" class="research-muted"></p><a class="quiet-button" href="#matchup-form">Edit matchup</a></header>
+    <p id="evidence-status" class="research-muted" role="status"></p>
+    <button id="retry-evidence" type="button" class="quiet-button" hidden>Retry matchup research</button>
+    <div id="evidence-content" hidden>
+        <div id="fighter-form" class="fighter-form"></div>
+        <div class="report-analysis">
+        <section class="evidence-section report-findings"><h3>At a glance</h3><div id="matchup-findings" class="matchup-findings"></div></section>
+        <section id="fight-metrics-section" class="evidence-section" hidden><h3>Striking and grappling</h3><p id="fight-metrics-note" class="research-muted"></p><div id="fight-metrics" class="market-table-scroll"></div></section>
+        </div>
+        <section class="evidence-section"><h3>Recent fights</h3><p class="research-muted">Last five recorded UFC bouts, most recent first.</p><div id="recent-fights" class="fight-history-grid"></div></section>
+        <details id="career-history-section" class="evidence-section history-disclosure" hidden><summary><h3>Earlier fights &amp; other promotions</h3><span>Explore additional records</span></summary><p class="research-muted">Partial histories, with bouts already shown in the UFC record excluded.</p><div id="career-history" class="fight-history-grid"></div><p id="career-source" class="research-muted"></p></details>
+        <div class="opponent-comparisons">
+        <section class="evidence-section"><h3>Previous UFC meetings</h3><div id="evidence-h2h"></div></section>
+        <section class="evidence-section"><h3>Shared UFC opponents</h3><div id="common-opponents"></div></section>
+        </div>
+        <details class="evidence-gaps"><summary>Data coverage &amp; limitations</summary><ul id="evidence-gaps"></ul></details>
+        <div class="research-next"><a href="#forecast-panel" class="research-button">Set up an estimate <span aria-hidden="true">→</span></a><p class="research-muted">Choose the date, division and bout conditions.</p></div>
+    </div>
+</section>
+</div>
 
-    <p class="hero-standfirst">
-        Pick two fighters. The ensemble computes an 86-feature vector, runs it through five independently trained classifiers, and returns a Platt-calibrated probability with SHAP attribution and every number that led to the call.
-    </p>
+<div id="view-estimate" data-workspace-panel="estimate" role="tabpanel" aria-labelledby="tab-estimate" tabindex="0" hidden>
+<section id="forecast-panel" class="research-panel forecast-panel" aria-labelledby="forecast-heading" hidden>
+    <header class="research-heading"><div><span class="eyebrow">Model estimate</span><h2 id="forecast-heading">Set the fight conditions</h2></div></header>
+    <p class="research-muted">Choose the date, division and rounds for a hypothetical matchup.</p>
+    <p id="forecast-availability" class="research-muted" role="status"></p>
+    <form id="forecast-form" novalidate hidden>
+        <div class="forecast-fields">
+            <label>Fight date<input id="forecast-date" type="date" required></label>
+            <label>Division<select id="forecast-division" required><option value="">Choose a division</option></select></label>
+            <label>Rounds<select id="forecast-rounds"><option value="3">3 rounds</option><option value="5">5 rounds</option></select></label>
+            <label>Title bout<select id="forecast-title"><option value="no">No</option><option value="yes">Yes</option></select></label>
+        </div>
+        <button class="research-button" type="submit" id="forecast-submit">Estimate this matchup</button>
+        <p id="forecast-error" class="research-error" role="alert" hidden></p>
+    </form>
+    <div id="forecast-result" hidden></div>
+    <details id="forecast-audit" class="method-note" hidden><summary>How this model performed on later fights</summary><div id="forecast-audit-content"></div></details>
+</section>
 
-
-    <!-- PREDICTION DISPLAY (hidden until first run; JS fills) -->
-    <div class="prediction idle" id="prediction-top">
+<section class="research-panel model-panel" id="model-panel" hidden>
+    <p id="model-status" class="research-muted" role="status" hidden></p>
+    <details id="model-details" class="tool-disclosure">
+        <summary>Original model diagnostics <span>Earlier, uncalibrated model · kept separate from the estimate above</span></summary>
+        <p class="research-muted model-caution">Model data through <span data-model-field="dataThrough">the saved dataset date</span>. These probabilities have not passed an independent calibration check. A large number here does not establish high confidence.</p>
+    <div class="prediction idle" id="prediction-top" aria-label="Prediction result">
         <div class="pm-matchup">
             <div class="pm-side l">
-                <div class="pm-label">Red Corner &middot; implied odds</div>
+                <div class="pm-label">Red corner &middot; model probability</div>
                 <div class="pm-name" id="prob-f1-name">Fighter One</div>
                 <div class="pm-pct" id="prob-f1-val">&mdash;</div>
-                <div class="pm-odds" id="odds-f1">&mdash;</div>
+                <div class="pm-odds"><span id="odds-f1">&mdash;</span> <small>model-implied odds</small></div>
             </div>
             <div class="pm-vs">vs.</div>
             <div class="pm-side r">
-                <div class="pm-label">Blue Corner &middot; implied odds</div>
+                <div class="pm-label">Blue corner &middot; model probability</div>
                 <div class="pm-name" id="prob-f2-name">Fighter Two</div>
                 <div class="pm-pct" id="prob-f2-val">&mdash;</div>
-                <div class="pm-odds" id="odds-f2">&mdash;</div>
+                <div class="pm-odds"><span id="odds-f2">&mdash;</span> <small>model-implied odds</small></div>
             </div>
         </div>
 
@@ -85,60 +177,11 @@
 
         <div class="pm-winner">
             <span class="arr l" id="winner-arrow">&#9666;</span>
-            <span class="pm-winner-text">Odds favor <em id="winner-name">pick a fight</em></span>
+            <span class="pm-winner-text">Model favors <em id="winner-name">pick a fight</em></span>
             <span class="arr r" id="winner-arrow-r">&#9656;</span>
         </div>
 
-        <!-- LOADING OVERLAY (active while computing) -->
-        <div class="pm-loading" aria-hidden="true">
-            <div class="pm-loading-inner">
-                <div class="pm-loading-orbit">
-                    <span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <div class="pm-loading-label">&sect; &nbsp; computing the call</div>
-                <div class="pm-loading-status" id="loading-status">initializing</div>
-                <div class="pm-loading-sub">5-model ensemble &middot; 86 features &middot; Platt-calibrated</div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- FORM -->
-    <div class="form">
-        <div class="form-tag">&sect; input</div>
-        <div class="form-right">
-            <div class="form-inner">
-                <div class="form-field">
-                    <label>Red Corner</label>
-                    <div class="input-wrap">
-                        <input type="text" id="fighter1" placeholder="e.g. Alex Pereira" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="autocomplete1">
-                        <ul class="autocomplete-list hidden" id="autocomplete1" role="listbox" aria-label="Fighter suggestions"></ul>
-                    </div>
-                </div>
-                <div class="form-vs">&mdash; vs. &mdash;</div>
-                <div class="form-field">
-                    <label>Blue Corner</label>
-                    <div class="input-wrap">
-                        <input type="text" id="fighter2" placeholder="e.g. Magomed Ankalaev" autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="autocomplete2">
-                        <ul class="autocomplete-list hidden" id="autocomplete2" role="listbox" aria-label="Fighter suggestions"></ul>
-                    </div>
-                </div>
-            </div>
-            <div class="form-actions">
-                <button id="predict-btn" class="run-btn">
-                    <span class="btn-text">Run the prediction</span>
-                    <span class="loader hidden"></span>
-                </button>
-                <div class="form-hint">
-                    Picks from <strong id="fighter-count">2,112</strong> fighters &middot; trained on <strong id="fight-count">6,582</strong> fights &middot; <strong id="feature-count">86</strong> engineered features
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-
-<!-- RESULT LAYOUT — sticky corner rails + main reasoning (hidden until prediction runs) -->
+    </div><!-- RESULT LAYOUT — sticky corner rails + main reasoning (hidden until prediction runs) -->
 <div id="result-section" class="results hidden">
     <div class="results-layout">
 
@@ -152,21 +195,25 @@
                 <span class="meta-tag" id="profile-f1-age"></span>
             </div>
             <div class="rail-divider"></div>
-            <div class="rail-kicker">Career profile</div>
+            <div class="rail-kicker">Saved career profile</div>
+            <p class="profile-date" id="profile-f1-date"></p>
             <div class="stat-grid rail-stats" id="stats-f1"></div>
+            <p class="profile-date" id="feature-f1-date"></p>
         </aside>
 
 
         <!-- MAIN REASONING (center, scrolls) -->
-        <main id="main" class="main-reasoning">
+        <div class="main-reasoning">
 
-            <!-- A.1 — WHY THE CALL (SHAP) -->
+
+            <!-- FEATURE CONTRIBUTIONS -->
             <article class="card reveal">
                 <header class="card-head">
-                    <span class="card-num">A.1 &middot; Why the call</span>
-                    <h2 class="card-title"><em>Top factors</em> driving it.</h2>
-                    <span class="card-sub">SHAP attribution &middot; top-k &middot; ensemble mean</span>
+                    <span class="card-num">01 &middot; Explanation</span>
+                    <h2 class="card-title">What influences <em>the prediction.</em></h2>
+                    <span class="card-sub">Logistic regression contributions</span>
                 </header>
+                <p class="section-note">These factors explain the logistic regression model, one part of the ensemble. They describe model influence, not a fighter’s strengths or weaknesses.</p>
                 <div id="key-factors" class="factors-list"></div>
             </article>
 
@@ -174,37 +221,39 @@
             <div class="card-pair">
                 <article class="card reveal">
                     <header class="card-head">
-                        <span class="card-num">A.2 &middot; Council votes</span>
-                        <h2 class="card-title"><em>Five classifiers,</em> one mean.</h2>
-                        <span class="card-sub">per_model_probs &middot; equal-weight</span>
+                        <span class="card-num">02 &middot; Model comparison</span>
+                        <h2 class="card-title">Each model’s <em>prediction.</em></h2>
+                        <span class="card-sub">Both corner orders &middot; equal-weight model mean</span>
                     </header>
                     <div class="ch">
                         <span class="l" id="models-f1-name">Red</span>
                         <span class="r" id="models-f2-name">Blue</span>
                     </div>
                     <div id="model-breakdown" class="models-list"></div>
+                    <p class="section-note">These are matchup probabilities. <a href="/results#forecast-evaluation">See historical evaluation scores.</a></p>
                 </article>
 
                 <article class="card reveal">
                     <header class="card-head">
-                        <span class="card-num">A.3 &middot; Battlefield</span>
-                        <h2 class="card-title">Who owns <em>what.</em></h2>
-                        <span class="card-sub">category_scores &middot; 4 domains</span>
+                        <span class="card-num">03 &middot; Category influence</span>
+                        <h2 class="card-title">Where the model <em>leans.</em></h2>
+                        <span class="card-sub">Logistic regression &middot; grouped contributions</span>
                     </header>
                     <div class="ch">
                         <span class="l" id="edge-f1-name">Red</span>
                         <span class="r" id="edge-f2-name">Blue</span>
                     </div>
                     <div id="category-edges" class="edge-list"></div>
+                    <p class="section-note">Relative influence on a 0–100 scale, with 50 at the center. These are not win probabilities or fighter ratings.</p>
                 </article>
             </div>
 
             <!-- A.4 — WIN METHODS (inline strip, dark) -->
             <article class="card reveal dark strip">
                 <header class="card-head">
-                    <span class="card-num">A.4 &middot; Finish profile</span>
-                    <h2 class="card-title">How they <em>end fights.</em></h2>
-                    <span class="card-sub">finish_modes &middot; ko &middot; sub &middot; dec</span>
+                    <span class="card-num">04 &middot; Recorded wins</span>
+                    <h2 class="card-title">Wins by <em>method.</em></h2>
+                    <span class="card-sub">Career profile records &middot; before the dates shown</span>
                 </header>
                 <div class="method-grid">
                     <div class="method-col" id="method-f1"></div>
@@ -216,96 +265,24 @@
             <!-- A.5 — HEAD TO HEAD -->
             <article class="card reveal">
                 <header class="card-head">
-                    <span class="card-num">A.5 &middot; Head to head</span>
-                    <h2 class="card-title">Every stat <em>side by side.</em></h2>
-                    <span class="card-sub">career-weighted &middot; &lambda; = 0.3 exponential decay</span>
+                    <span class="card-num">05 &middot; Stat comparison</span>
+                    <h2 class="card-title">The stats, <em>side by side.</em></h2>
+                    <span class="card-sub">Saved career profiles &middot; not live records</span>
                 </header>
                 <div id="comparison-rows" class="comparison-rows"></div>
             </article>
 
-            <!-- A.6 + A.7 — SIDE BY SIDE (calibration dark + neighbors) -->
-            <div class="card-pair">
-                <article class="card reveal dark">
-                    <header class="card-head">
-                        <span class="card-num">A.6 &middot; Honesty</span>
-                        <h2 class="card-title">Is the model <em>calibrated.</em></h2>
-                        <span class="card-sub">holdout 2022&ndash;2024 &middot; n = 1,284</span>
-                    </header>
-                    <div class="chart">
-                        <div class="chart-frame dark-chart">
-                            <div class="chart-grid">
-                                <span>100</span><span>&nbsp;80</span><span>&nbsp;60</span><span>&nbsp;40</span><span>&nbsp;20</span>
-                            </div>
-                            <svg class="chart-line" viewBox="0 0 500 200" preserveAspectRatio="none">
-                                <line x1="0" y1="200" x2="500" y2="0" stroke="rgba(239,234,221,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
-                                <polyline points="50,90 150,74 250,58 350,44 450,32" fill="none" stroke="#efeadd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <div class="chart-dots">
-                                <div class="chart-dot" style="left:10%;bottom:54.8%"></div>
-                                <div class="chart-dot" style="left:30%;bottom:63.1%"></div>
-                                <div class="chart-dot hi" style="left:50%;bottom:71.2%"></div>
-                                <div class="chart-dot" style="left:70%;bottom:78.4%"></div>
-                                <div class="chart-dot" style="left:90%;bottom:84.2%"></div>
-                            </div>
-                        </div>
-                        <div class="chart-xlabels">
-                            <span>50&ndash;60</span>
-                            <span>60&ndash;70</span>
-                            <span class="hi">70&ndash;80</span>
-                            <span>80&ndash;90</span>
-                            <span>90&ndash;100</span>
-                        </div>
-                    </div>
-                    <div class="fig-caption"><b>Fig. A1.</b> Observed win rates vs. predicted confidence.</div>
-                </article>
-
-                <article class="card reveal">
-                    <header class="card-head">
-                        <span class="card-num">A.7 &middot; Neighbors</span>
-                        <h2 class="card-title">Closest fights <em>on record.</em></h2>
-                        <span class="card-sub">cosine_sim &ge; 0.82 &middot; 4 of 5</span>
-                    </header>
-                    <div class="hist-list compact">
-                        <div class="hist-row right">
-                            <div class="hist-matchup"><em>Adesanya &middot; Pereira II</em><small>UFC 287 &middot; sim 0.91</small></div>
-                            <div class="hist-verdict">58&ndash;42</div>
-                            <div class="hist-status">&check;</div>
-                        </div>
-                        <div class="hist-row right">
-                            <div class="hist-matchup"><em>Blachowicz &middot; Adesanya</em><small>UFC 259 &middot; sim 0.88</small></div>
-                            <div class="hist-verdict">42&ndash;58</div>
-                            <div class="hist-status">&check;</div>
-                        </div>
-                        <div class="hist-row right">
-                            <div class="hist-matchup"><em>Jones &middot; Reyes</em><small>UFC 247 &middot; sim 0.86</small></div>
-                            <div class="hist-verdict">74&ndash;26</div>
-                            <div class="hist-status">&check;</div>
-                        </div>
-                        <div class="hist-row right">
-                            <div class="hist-matchup"><em>Pereira &middot; Prochazka I</em><small>UFC 303 &middot; sim 0.84</small></div>
-                            <div class="hist-verdict">66&ndash;34</div>
-                            <div class="hist-status">&check;</div>
-                        </div>
-                        <div class="hist-row wrong">
-                            <div class="hist-matchup"><em>Whittaker &middot; Adesanya I</em><small>UFC 243 &middot; sim 0.83</small></div>
-                            <div class="hist-verdict">52&ndash;48</div>
-                            <div class="hist-status">&times;</div>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
             <!-- A.8 — DIRECT H2H (conditional) -->
             <article class="card reveal hidden" id="history-card">
                 <header class="card-head">
-                    <span class="card-num">A.8 &middot; Direct history</span>
+                    <span class="card-num">06 &middot; Previous meetings</span>
                     <h2 class="card-title">They&rsquo;ve met <em>before.</em></h2>
-                    <span class="card-sub">direct_h2h &middot; recorded encounters</span>
+                    <span class="card-sub">Results recorded in the dataset</span>
                 </header>
                 <div id="historical-matchups" class="history-list"></div>
             </article>
 
-        </main>
+        </div>
 
 
         <!-- BLUE CORNER RAIL (sticky right) -->
@@ -318,35 +295,89 @@
                 <span class="meta-tag" id="profile-f2-age"></span>
             </div>
             <div class="rail-divider"></div>
-            <div class="rail-kicker">Career profile</div>
+            <div class="rail-kicker">Saved career profile</div>
+            <p class="profile-date" id="profile-f2-date"></p>
             <div class="stat-grid rail-stats" id="stats-f2"></div>
+            <p class="profile-date" id="feature-f2-date"></p>
         </aside>
 
     </div>
 </div>
+    </details>
+</section>
 
+ </div>
+<div id="view-prices" data-workspace-panel="prices" role="tabpanel" aria-labelledby="tab-prices" tabindex="0" hidden>
+<section id="price-research" class="research-panel price-panel" aria-labelledby="price-heading">
+    <header class="research-heading">
+        <div><span class="eyebrow">Price comparison</span><h2 id="price-heading">Compare the market with your estimate</h2></div>
+        <button id="load-prices" type="button" class="quiet-button" hidden>Load bookmaker prices</button>
+    </header>
+    <details id="price-tools" class="tool-disclosure" open><summary>Moneyline comparison</summary>
+    <p id="quote-source-status" class="research-muted">Enter both moneylines from the same bookmaker. Quotes you enter are not a live feed.</p>
+    <p id="feed-status" class="research-muted" role="status"></p>
+    <div id="feed-results"></div>
+    <form id="price-form" novalidate>
+        <div class="quote-fields">
+            <label>Bookmaker<input id="bookmaker" type="text" placeholder="Book or exchange name" maxlength="100" autocomplete="off"></label>
+            <label>Format<select id="odds-format"><option value="american">American (+150 / −110)</option><option value="decimal">Decimal (2.50 / 1.91)</option></select></label>
+            <label><span id="quote-f1-name">First fighter</span><input id="price-f1" type="text" inputmode="text" placeholder="e.g. −110" autocomplete="off"></label>
+            <label><span id="quote-f2-name">Second fighter</span><input id="price-f2" type="text" inputmode="text" placeholder="e.g. −110" autocomplete="off"></label>
+        </div>
+        <div class="estimate-fields">
+            <label>Probability source<select id="probability-source"><option value="user">My own estimate</option><option value="model" disabled>Model estimate · set up a forecast first</option></select></label>
+            <label><span id="estimate-label">First fighter’s win probability</span><span class="input-suffix"><input id="probability" type="number" inputmode="decimal" min="0" max="100" step="0.1" placeholder="0–100"><span>%</span></span></label>
+            <label>Quote observed<input id="quoted-at" type="datetime-local"></label>
+        </div>
+        <p id="estimate-context" class="research-muted">Use your own probability estimate. A high win probability can still be a poor price.</p>
+        <button class="research-button" type="submit">Compare price</button>
+        <p id="price-error" class="research-error" role="alert" hidden></p>
+    </form>
+    <div id="price-result" hidden>
+        <div class="market-table-scroll">
+            <table class="market-table" role="table"><caption id="market-caption">Price comparison</caption><thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">Fighter</th><th scope="col" role="columnheader">Offered price</th><th scope="col" role="columnheader">Break-even</th><th scope="col" role="columnheader">Market, no margin</th><th scope="col" role="columnheader" id="probability-column">Your estimate</th><th scope="col" role="columnheader">Gap</th><th scope="col" role="columnheader">Expected return / unit</th></tr></thead><tbody id="market-rows" role="rowgroup"></tbody></table>
+        </div>
+        <p id="market-context" class="research-muted"></p>
+        <details class="method-note"><summary>How to read this</summary><p>Break-even is the win rate needed at the offered price. The market baseline removes the bookmaker’s margin by normalizing the two implied probabilities. Gap is your selected estimate minus that baseline, in percentage points.</p><p>Expected return is probability × decimal odds − 1 per unit staked. It is conditional on the probability estimate, before commissions and other fees. It is not a verified betting edge. The audited candidate has separate calibration and later-fight evaluation, but has not demonstrated a betting edge.</p></details>
+        <form id="save-research" class="save-research" novalidate>
+            <div class="save-fields">
+                <label>Selection<select id="journal-selection"><option value="">Choose a fighter</option></select></label>
+                <label>Stake, in units<input id="journal-stake" type="number" min="0.01" step="0.01" inputmode="decimal" value="1"></label>
+                <label class="notes-field">Reasoning<textarea id="journal-notes" rows="2" maxlength="2000" placeholder="What makes this price worth taking? What could change your view?"></textarea></label>
+            </div>
+            <div class="save-actions"><button type="submit" class="research-button">Save to journal</button><span class="research-muted">Saves this price, probability, source and time.</span></div>
+            <p id="save-status" class="research-muted" role="status"></p>
+        </form>
+    </div>
+    </details>
+</section>
+</div>
+
+<div id="view-journal" data-workspace-panel="journal" role="tabpanel" aria-labelledby="tab-journal" tabindex="0" hidden>
+<section id="journal" class="research-panel journal-panel" aria-labelledby="journal-heading">
+    <header class="research-heading"><div><span class="eyebrow">Your record</span><h2 id="journal-heading">Research journal</h2></div><button id="export-journal" class="quiet-button" type="button" disabled>Export CSV</button></header>
+    <p class="research-muted">Saved in this browser, with outcomes recorded by you.</p>
+    <div id="journal-summary" class="journal-summary"></div>
+    <p id="journal-status" class="research-error" role="status" hidden></p>
+    <div id="journal-entries"></div>
+    <div id="journal-undo" class="journal-undo" hidden><span>Entry removed.</span><button type="button" class="quiet-button" id="undo-remove">Undo</button></div>
+</section>
+</div>
+</section>
+
+
+
+</main>
 
 <!-- COLOPHON / NOTES -->
-<aside class="colophon">
-    <span class="colophon-tag">&sect; notes</span>
-    <div class="colophon-body">
-        <p><sup>1</sup> All model metrics computed on held-out test set (2022&ndash;2024, n=1,284). Training period: 2001&ndash;2021.</p>
-        <p><sup>2</sup> SHAP values per Lundberg &amp; Lee (2017). Percentile ranks computed against active UFC fighters in the same division.</p>
-        <p><sup>3</sup> Confidence intervals derived from bootstrap resampling (n=1,000) of training data.</p>
-        <p><sup>4</sup> Cosine similarity computed on the full 86-feature vector with standardized features (&mu;=0, &sigma;=1).</p>
-    </div>
-</aside>
-
-
 <!-- FOOTER -->
 <footer>
-    <div>
-        <b>V3RSUS</b> &middot; 2026 &middot; Interactive Supplement &middot; CIS 5450, University of Pennsylvania
-    </div>
+    <div><b>Versus</b><span>Historical evidence. Conditional estimates.</span></div>
     <div>
         <a href="/">Home</a>
-        <a href="about.html">About</a>
-        <a href="https://github.com/Smokeybear10/102-RSCH.V3RSUS">GitHub</a>
+        <a href="/results">Results</a>
+        <a href="/methodology">Methodology &amp; limitations</a>
+        <a href="https://github.com/Smokeybear10/005.CORE.versus">GitHub</a>
     </div>
 </footer>
 

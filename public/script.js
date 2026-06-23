@@ -1,235 +1,258 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ---- Hero fade + top bar reveal on scroll ----
-    const hero = document.getElementById("hero");
-    const topBar = document.getElementById("top-bar");
+    const MODEL_DISPLAY = {
+        logistic_regression: "Logistic regression",
+        random_forest: "Random forest",
+        gradient_boosting: "Gradient boosting",
+        ensemble: "Ensemble mean",
+    };
+    const formatDate = value => value ? new Date(`${value.slice(0, 10)}T12:00:00Z`).toLocaleDateString("en-US", {
+        month: "short", day: "numeric", year: "numeric", timeZone: "UTC",
+    }) : "Not recorded";
+    const formatPercent = value => Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : "—";
 
-    if (hero && topBar) {
-        let heroH = hero.offsetHeight;
-        let ticking = false;
-
-        window.addEventListener("resize", () => { heroH = hero.offsetHeight; }, { passive: true });
-
-        window.addEventListener("scroll", () => {
-            if (!ticking) {
-                requestAnimationFrame(() => {
-                    const progress = Math.min(window.scrollY / (heroH * 0.6), 1);
-                    hero.style.opacity = 1 - progress;
-                    topBar.classList.toggle("visible", progress > 0.15);
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true });
+    async function readJSON(url, options = {}) {
+        const response = await fetch(url, { ...options, signal: AbortSignal.timeout(55000) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "The server could not complete this request.");
+        return data;
     }
+
+    readJSON("/api/model-info").then(info => {
+        const models = info.models || {};
+        const fields = {
+            fighterCount: info.fighterCount?.toLocaleString() ?? "—",
+            fightCount: info.fightCount?.toLocaleString() ?? "—",
+            featureCount: info.featureCount ?? "—",
+            modelCount: Object.keys(models).length,
+            modelNames: Object.keys(models).map(key => MODEL_DISPLAY[key] || key).join(", "),
+            dateRange: info.dateRange?.start && info.dateRange?.end
+                ? `${formatDate(info.dateRange.start)} – ${formatDate(info.dateRange.end)}` : "Not recorded",
+            profileDateRange: info.profileDateRange?.start && info.profileDateRange?.end
+                ? `${formatDate(info.profileDateRange.start)} – ${formatDate(info.profileDateRange.end)}` : "Not recorded",
+            trainedAt: formatDate(info.trainedAt),
+            dataThrough: formatDate(info.dateRange?.end),
+        };
+        document.querySelectorAll("[data-model-field]").forEach(element => {
+            element.textContent = fields[element.dataset.modelField] ?? "—";
+        });
+        const status = document.getElementById("model-info-status");
+        if (status) status.textContent = info.ready === false ? "Prediction data is unavailable. Try again shortly." : "Loaded from the model and its saved datasets.";
+        const table = document.getElementById("model-evaluation");
+        if (table) {
+            table.innerHTML = Object.entries(models).map(([key, metrics]) => `<tr>
+                <th scope="row">${esc(MODEL_DISPLAY[key] || key)}</th>
+                <td>${formatPercent(metrics.accuracy)}</td>
+                <td>${formatPercent(metrics.ts_accuracy)}</td>
+            </tr>`).join("") || '<tr><td colspan="3">No evaluation scores were saved with this model.</td></tr>';
+        }
+    }).catch(() => {
+        const status = document.getElementById("model-info-status");
+        if (status) status.textContent = "Dataset details are unavailable. Reload to try again.";
+        const table = document.getElementById("model-evaluation");
+        if (table) table.innerHTML = '<tr><td colspan="3">Evaluation scores could not be loaded.</td></tr>';
+    });
+
+    const form = document.getElementById("matchup-form");
+    if (!form) return;
 
     const f1Input = document.getElementById("fighter1");
     const f2Input = document.getElementById("fighter2");
     const ac1 = document.getElementById("autocomplete1");
     const ac2 = document.getElementById("autocomplete2");
-
-
+    const matchBtn = document.getElementById("predict-btn");
+    const errorEl = document.getElementById("form-error");
+    const statusEl = document.getElementById("form-status");
+    const retryBtn = document.getElementById("retry-fighters");
+    const resultSec = document.getElementById("result-section");
+    const predictionEl = document.getElementById("prediction-top");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let allFighters = [];
+    let matchupRevision = 0;
+    let fightersReady = false;
+    let pendingRestore = "url";
+    const normalizeName = value => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, " ").toLowerCase();
 
-    fetch("/api/fighters")
-        .then(res => res.json())
-        .then(data => { allFighters = data.fighters || []; })
-        .catch(err => console.error(err));
-
-    fetch("/api/model-info")
-        .then(res => res.json())
-        .then(info => {
-            const el = (id, val) => {
-                const e = document.getElementById(id);
-                if (e) e.textContent = val;
-            };
-            el("fighter-count", info.fighterCount.toLocaleString());
-            el("fight-count", info.fightCount.toLocaleString());
-            el("feature-count", info.featureCount);
-        })
-        .catch(err => console.error(err));
-
-    // ---- Autocomplete ----
-    function setupAutocomplete(inputEl, listEl) {
-        let activeIdx = -1;
-
-        function updateActive() {
-            const items = listEl.querySelectorAll("li");
-            items.forEach((li, i) => {
-                li.classList.toggle("active", i === activeIdx);
-                li.setAttribute("aria-selected", i === activeIdx);
-            });
+    function showError(message, input) {
+        errorEl.textContent = message;
+        errorEl.hidden = !message;
+        if (input) {
+            input.setAttribute("aria-invalid", "true");
+            input.focus();
         }
-
-        function selectItem(match) {
-            inputEl.value = match;
-            listEl.innerHTML = "";
-            listEl.classList.add("hidden");
-            inputEl.setAttribute("aria-expanded", "false");
-            activeIdx = -1;
-        }
-
-        inputEl.addEventListener("input", function () {
-            const val = this.value;
-            listEl.innerHTML = "";
-            activeIdx = -1;
-            if (!val) { listEl.classList.add("hidden"); inputEl.setAttribute("aria-expanded", "false"); return; }
-            const matches = allFighters
-                .filter(f => f.toLowerCase().includes(val.toLowerCase()))
-                .slice(0, 10);
-            if (matches.length > 0) {
-                listEl.classList.remove("hidden");
-                inputEl.setAttribute("aria-expanded", "true");
-                const needle = val.toLowerCase();
-                matches.forEach(match => {
-                    const li = document.createElement("li");
-                    li.setAttribute("role", "option");
-                    li.setAttribute("aria-selected", "false");
-                    const idx = match.toLowerCase().indexOf(needle);
-                    if (idx >= 0) {
-                        li.appendChild(document.createTextNode(match.slice(0, idx)));
-                        const strong = document.createElement("strong");
-                        strong.textContent = match.slice(idx, idx + needle.length);
-                        li.appendChild(strong);
-                        li.appendChild(document.createTextNode(match.slice(idx + needle.length)));
-                    } else {
-                        li.textContent = match;
-                    }
-                    li.addEventListener("click", () => selectItem(match));
-                    listEl.appendChild(li);
-                });
-            } else {
-                listEl.classList.add("hidden");
-                inputEl.setAttribute("aria-expanded", "false");
-            }
-        });
-
-        inputEl.addEventListener("keydown", e => {
-            const items = listEl.querySelectorAll("li");
-            if (!items.length) return;
-            if (e.key === "ArrowDown") {
-                e.preventDefault();
-                activeIdx = Math.min(activeIdx + 1, items.length - 1);
-                updateActive();
-            } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                activeIdx = Math.max(activeIdx - 1, 0);
-                updateActive();
-            } else if (e.key === "Enter" && activeIdx >= 0) {
-                e.preventDefault();
-                selectItem(items[activeIdx].textContent);
-            } else if (e.key === "Escape") {
-                listEl.classList.add("hidden");
-                inputEl.setAttribute("aria-expanded", "false");
-                activeIdx = -1;
-            }
-        });
-
-        document.addEventListener("click", e => {
-            if (e.target !== inputEl && !listEl.contains(e.target)) {
-                listEl.classList.add("hidden");
-                inputEl.setAttribute("aria-expanded", "false");
-                activeIdx = -1;
-            }
-        });
     }
 
+    function setBusy(busy) {
+        form.setAttribute("aria-busy", String(busy));
+        f1Input.disabled = busy;
+        f2Input.disabled = busy;
+        matchBtn.disabled = busy;
+        document.getElementById("example-matchup").disabled = busy;
+    }
+
+    async function loadFighters() {
+        setBusy(true);
+        retryBtn.hidden = true;
+        showError("");
+        statusEl.textContent = "Loading the fighter list…";
+        try {
+            const data = await readJSON("/api/fighters");
+            if (!Array.isArray(data.fighters) || !data.fighters.length) throw new Error("No fighters available");
+            allFighters = data.fighters.filter(name => typeof name === "string");
+            fightersReady = true;
+            setBusy(false);
+            statusEl.textContent = "";
+            if (pendingRestore) {
+                const origin = pendingRestore;
+                pendingRestore = null;
+                restoreMatchup(origin);
+            }
+        } catch {
+            form.setAttribute("aria-busy", "false");
+            f1Input.disabled = false;
+            f2Input.disabled = false;
+            statusEl.textContent = "";
+            showError("Model lookup is unavailable. You can enter fighter names and compare prices below, or retry the lookup.");
+            retryBtn.hidden = false;
+        }
+    }
+    retryBtn.addEventListener("click", loadFighters);
+    loadFighters();
+    document.getElementById("example-matchup").addEventListener("click", () => {
+        f1Input.value = "Alexander Volkanovski";
+        f2Input.value = "Diego Lopes";
+        f1Input.dispatchEvent(new Event("input", { bubbles: true }));
+        f2Input.dispatchEvent(new Event("input", { bubbles: true }));
+        [ac1, ac2].forEach(list => { list.replaceChildren(); list.classList.add("hidden"); });
+        [f1Input, f2Input].forEach(input => input.setAttribute("aria-expanded", "false"));
+        form.requestSubmit();
+    });
+
+    function setupAutocomplete(input, list) {
+        let activeIndex = -1;
+        function close() {
+            list.replaceChildren();
+            list.classList.add("hidden");
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
+            activeIndex = -1;
+        }
+        function select(name) {
+            input.value = name;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            close();
+        }
+        function show() {
+            close();
+            const query = normalizeName(input.value);
+            if (!query) return;
+            const rank = name => name.startsWith(query) ? 0 : name.includes(` ${query}`) ? 1 : 2;
+            const matches = allFighters.map(name => ({name, normalized:normalizeName(name)}))
+                .filter(fighter => fighter.normalized.includes(query))
+                .sort((first, second) => rank(first.normalized) - rank(second.normalized) || first.name.localeCompare(second.name))
+                .slice(0, 10);
+            list.classList.remove("hidden");
+            input.setAttribute("aria-expanded", "true");
+            if (!matches.length) {
+                const item = document.createElement("li");
+                item.setAttribute("role", "presentation");
+                item.classList.add("autocomplete-empty");
+                item.textContent = "No matching fighters. Try another name.";
+                list.appendChild(item);
+                return;
+            }
+            matches.forEach(({name}, index) => {
+                const item = document.createElement("li");
+                item.id = `${list.id}-option-${index}`;
+                item.setAttribute("role", "option");
+                item.setAttribute("aria-selected", "false");
+                item.textContent = name;
+                item.addEventListener("mousedown", event => event.preventDefault());
+                item.addEventListener("click", () => select(name));
+                list.appendChild(item);
+            });
+        }
+        input.addEventListener("input", () => {
+            matchupRevision += 1;
+            showError("");
+            statusEl.textContent = "";
+            input.removeAttribute("aria-invalid");
+            resultSec.classList.add("hidden");
+            predictionEl.classList.add("idle");
+            window.dispatchEvent(new CustomEvent("versus:matchup-change"));
+            show();
+        });
+        input.addEventListener("focus", show);
+        input.addEventListener("keydown", event => {
+            if (event.key === "Escape" || event.key === "Tab") return close();
+            if ((event.key === "ArrowDown" || event.key === "ArrowUp") && input.getAttribute("aria-expanded") !== "true") show();
+            const items = [...list.children].filter(item => item.getAttribute("role") === "option");
+            if (!items.length) return;
+            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                activeIndex = Math.max(0, Math.min(items.length - 1, activeIndex + (event.key === "ArrowDown" ? 1 : -1)));
+                items.forEach((item, index) => {
+                    item.classList.toggle("active", index === activeIndex);
+                    item.setAttribute("aria-selected", String(index === activeIndex));
+                });
+                input.setAttribute("aria-activedescendant", items[activeIndex].id);
+                items[activeIndex].scrollIntoView({block:"nearest", inline:"nearest"});
+            } else if (event.key === "Enter" && activeIndex >= 0) {
+                event.preventDefault();
+                select(items[activeIndex].textContent);
+            }
+        });
+        input.addEventListener("blur", close);
+    }
     setupAutocomplete(f1Input, ac1);
     setupAutocomplete(f2Input, ac2);
 
-    const resultSec = document.getElementById("result-section");
-
-    const revealObserver = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add("visible");
+    function closeSuggestions() {
+        [ac1, ac2].forEach(list => { list.replaceChildren(); list.classList.add("hidden"); });
+        [f1Input, f2Input].forEach(input => {
+            input.setAttribute("aria-expanded", "false");
+            input.removeAttribute("aria-activedescendant");
         });
-    }, { threshold: 0.1 });
-    document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+    }
 
-    // ---- Prediction ----
-    const matchBtn = document.getElementById("predict-btn");
-    const btnText = document.querySelector(".btn-text");
-    const loader = document.querySelector(".loader");
-
-    const LOADING_STEPS = [
-        "loading fighter profiles",
-        "building 86-feature vector",
-        "standardizing against training set",
-        "xgboost voting",
-        "lightgbm voting",
-        "logistic regression voting",
-        "random forest voting",
-        "svm voting",
-        "averaging ensemble",
-        "platt-scaling probabilities",
-        "computing shap attribution",
-        "finding nearest neighbors",
-        "finalizing odds",
-    ];
-    const MIN_LOAD_MS = 2000;
-    const predictionEl = document.getElementById("prediction-top");
-    const loadingStatusEl = document.getElementById("loading-status");
-
-    matchBtn.addEventListener("click", () => {
-        const fighter1 = f1Input.value.trim();
-        const fighter2 = f2Input.value.trim();
-        if (!fighter1 || !fighter2) { alert("Please select both fighters."); return; }
-        if (fighter1.toLowerCase() === fighter2.toLowerCase()) { alert("Pick two different fighters."); return; }
-
-        const started = Date.now();
-
+    function startResearch(origin = "form") {
+        showError("");
+        if (!fightersReady) return;
+        [f1Input, f2Input].forEach(input => input.removeAttribute("aria-invalid"));
+        for (const input of [f1Input, f2Input]) {
+            const name = allFighters.find(fighter => normalizeName(fighter) === normalizeName(input.value));
+            if (!name) return showError("Choose a fighter from the suggestions.", input);
+            input.value = name;
+        }
+        if (f1Input.value === f2Input.value) return showError("Choose two different fighters.", f2Input);
+        const fighter1 = f1Input.value;
+        const fighter2 = f2Input.value;
         resultSec.classList.add("hidden");
-        btnText.classList.add("hidden");
-        loader.classList.remove("hidden");
-        matchBtn.disabled = true;
-        predictionEl.classList.remove("idle");
-        predictionEl.classList.add("loading");
+        predictionEl.classList.add("idle");
+        closeSuggestions();
+        window.dispatchEvent(new CustomEvent("versus:research-start", { detail: { fighter1, fighter2, origin } }));
+        statusEl.textContent = "";
+    }
 
-        // Scroll the prediction strip into view so the status line is visible
-        predictionEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    function restoreMatchup(origin) {
+        const params = new URL(window.location.href).searchParams;
+        showError("");
+        statusEl.textContent = "";
+        [f1Input, f2Input].forEach(input => input.removeAttribute("aria-invalid"));
+        f1Input.value = params.get("fighter1") || "";
+        f2Input.value = params.get("fighter2") || "";
+        closeSuggestions();
+        window.dispatchEvent(new CustomEvent("versus:matchup-change", { detail: { preserveURL: true } }));
+        if (f1Input.value && f2Input.value) startResearch(origin);
+        else if (f1Input.value || f2Input.value) showError("Choose both fighters to open this matchup.");
+    }
 
-        // Cycle loading status, restart tick animation on each change
-        let stepIdx = 0;
-        if (loadingStatusEl) loadingStatusEl.textContent = LOADING_STEPS[0];
-        const statusTimer = setInterval(() => {
-            stepIdx = (stepIdx + 1) % LOADING_STEPS.length;
-            if (loadingStatusEl) {
-                loadingStatusEl.textContent = LOADING_STEPS[stepIdx];
-                loadingStatusEl.style.animation = "none";
-                void loadingStatusEl.offsetWidth;
-                loadingStatusEl.style.animation = "";
-            }
-        }, 190);
-
-        const finish = (cb) => {
-            const elapsed = Date.now() - started;
-            const wait = Math.max(0, MIN_LOAD_MS - elapsed);
-            setTimeout(() => {
-                clearInterval(statusTimer);
-                predictionEl.classList.remove("loading");
-                btnText.classList.remove("hidden");
-                loader.classList.add("hidden");
-                matchBtn.disabled = false;
-                cb && cb();
-            }, wait);
-        };
-
-        fetch("/api/predict", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fighter1, fighter2 })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    finish(() => { predictionEl.classList.add("idle"); alert("Error: " + data.error); });
-                } else {
-                    finish(() => renderResults(data));
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                finish(() => { predictionEl.classList.add("idle"); alert("Network error."); });
-            });
+    window.addEventListener("versus:restore-matchup", () => {
+        if (fightersReady) restoreMatchup("history");
+        else pendingRestore = "history";
+    });
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        startResearch();
     });
 
     function esc(str) {
@@ -239,7 +262,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function fmt(val, suffix) {
-        if (val === null || val === undefined) return "\u2014";
+        if (val === null || val === undefined || (typeof val === "number" && !Number.isFinite(val))) return "\u2014";
+        if (typeof val === "number") val = Number(val.toFixed(1));
         return suffix ? esc(val + suffix) : esc(String(val));
     }
 
@@ -274,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
         f1Fill.style.width = "0%";
         f2Fill.style.width = "0%";
 
-        document.getElementById("winner-name").textContent = winner;
+        document.getElementById("winner-name").textContent = winner ?? "neither fighter";
         const arrowL = document.getElementById("winner-arrow");
         const arrowR = document.getElementById("winner-arrow-r");
         arrowL.classList.toggle("active", winner === fighter1);
@@ -299,23 +323,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Reveal result section and animate bar fill
+        document.getElementById("model-panel").hidden = false;
+        document.getElementById("model-details").hidden = false;
+        document.getElementById("model-status").hidden = true;
+        predictionEl.classList.remove("idle");
         resultSec.classList.remove("hidden");
+        resultSec.querySelectorAll(".reveal").forEach(element => element.classList.add("visible"));
         setTimeout(() => {
             f1Fill.style.width = p1 + "%";
             f2Fill.style.width = p2 + "%";
         }, 80);
 
-        // Scroll so the verdict strip sits at the top of the viewport
-        const predEl = document.getElementById("prediction-top");
-        if (predEl) predEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.dispatchEvent(new CustomEvent("versus:prediction", { detail: data }));
     }
 
     // ---- Fighter Profile ----
     function renderProfile(prefix, name, stats) {
         document.getElementById(`profile-${prefix}-name`).textContent = name;
-        document.getElementById(`profile-${prefix}-record`).textContent = stats.record;
+        document.getElementById(`profile-${prefix}-record`).textContent = stats.record ?? "—";
+        document.getElementById(`profile-${prefix}-date`).textContent = stats.available
+            ? `Profile before ${formatDate(stats.asOf)}` : "Career profile unavailable";
+        document.getElementById(`feature-${prefix}-date`).textContent = `Last bout in model data: ${formatDate(stats.featureAsOf)}`;
         document.getElementById(`profile-${prefix}-stance`).textContent = stats.stance || "Unknown";
-        document.getElementById(`profile-${prefix}-age`).textContent = stats.age ? `Age ${stats.age}` : "";
+        document.getElementById(`profile-${prefix}-age`).textContent = Number.isFinite(stats.age) ? `Age ${Math.floor(stats.age)}` : "";
 
         const grid = document.getElementById(`stats-${prefix}`);
         grid.innerHTML = "";
@@ -324,11 +354,11 @@ document.addEventListener("DOMContentLoaded", () => {
             ["Height", stats.height],
             ["Reach", stats.reach],
             ["Weight", stats.weight ? stats.weight + " lbs" : null],
-            ["Win Streak", stats.currentWinStreak > 0 ? stats.currentWinStreak : "\u2014"],
+            ["Win Streak", stats.currentWinStreak],
             ["Sig. Str/Min", fmt(stats.avgSigStrLanded)],
-            ["Str. Acc.", fmt(stats.avgSigStrPct, "%")],
+            ["Str. Acc.", formatPercent(stats.avgSigStrPct)],
             ["TD Avg", fmt(stats.avgTDLanded)],
-            ["TD Acc.", fmt(stats.avgTDPct, "%")],
+            ["TD Acc.", formatPercent(stats.avgTDPct)],
             ["Sub Avg", fmt(stats.avgSubAtt)],
             ["Title Bouts", fmt(stats.titleBouts)],
             ["Total Rnds", fmt(stats.totalRounds)],
@@ -338,7 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
         items.forEach(([label, value]) => {
             const div = document.createElement("div");
             div.className = "stat-item";
-            div.innerHTML = `<span class="stat-label">${esc(label)}</span><span class="stat-value">${esc(value || "\u2014")}</span>`;
+            div.innerHTML = `<span class="stat-label">${esc(label)}</span><span class="stat-value">${esc(value ?? "\u2014")}</span>`;
             grid.appendChild(div);
         });
     }
@@ -352,34 +382,35 @@ document.addEventListener("DOMContentLoaded", () => {
             ["Wins", f1.wins, f2.wins],
             ["Losses", f1.losses, f2.losses, true],
             ["Sig. Str/Min", f1.avgSigStrLanded, f2.avgSigStrLanded],
-            ["Str. Accuracy", f1.avgSigStrPct, f2.avgSigStrPct],
+            ["Str. Accuracy", f1.avgSigStrPct, f2.avgSigStrPct, false, true],
             ["TD Average", f1.avgTDLanded, f2.avgTDLanded],
-            ["TD Accuracy", f1.avgTDPct, f2.avgTDPct],
+            ["TD Accuracy", f1.avgTDPct, f2.avgTDPct, false, true],
             ["Sub Attempts", f1.avgSubAtt, f2.avgSubAtt],
             ["Win Streak", f1.currentWinStreak, f2.currentWinStreak],
         ];
 
-        metrics.forEach(([label, v1, v2, invertAdvantage]) => {
+        metrics.forEach(([label, v1, v2, invertAdvantage, percentage]) => {
             const val1 = v1 ?? 0;
             const val2 = v2 ?? 0;
             const total = val1 + val2 || 1;
             const pct1 = (val1 / total) * 100;
             const pct2 = (val2 / total) * 100;
-            const leftLeads = invertAdvantage ? val1 < val2 : val1 > val2;
-            const rightLeads = invertAdvantage ? val2 < val1 : val2 > val1;
+            const complete = Number.isFinite(v1) && Number.isFinite(v2);
+            const leftLeads = !complete ? false : invertAdvantage ? val1 < val2 : val1 > val2;
+            const rightLeads = !complete ? false : invertAdvantage ? val2 < val1 : val2 > val1;
 
             const row = document.createElement("div");
             row.className = "cmp-row";
             row.innerHTML = `
-                <div class="cmp-val left ${leftLeads ? 'advantage' : ''}">${fmt(v1)}</div>
+                <div class="cmp-val left ${leftLeads ? 'advantage' : ''}">${percentage ? formatPercent(v1) : fmt(v1)}</div>
                 <div class="cmp-center">
                     <div class="cmp-label">${esc(label)}</div>
                     <div class="cmp-bar-wrap">
-                        <div class="cmp-bar-left ${leftLeads ? 'lead' : ''}" style="width:${pct1}%"></div>
-                        <div class="cmp-bar-right ${rightLeads ? 'lead' : ''}" style="width:${pct2}%"></div>
+                        <div class="cmp-bar-left ${leftLeads ? 'lead' : ''}" style="width:${complete ? pct1 : 0}%"></div>
+                        <div class="cmp-bar-right ${rightLeads ? 'lead' : ''}" style="width:${complete ? pct2 : 0}%"></div>
                     </div>
                 </div>
-                <div class="cmp-val right ${rightLeads ? 'advantage' : ''}">${fmt(v2)}</div>
+                <div class="cmp-val right ${rightLeads ? 'advantage' : ''}">${percentage ? formatPercent(v2) : fmt(v2)}</div>
             `;
             rows.appendChild(row);
         });
@@ -408,13 +439,13 @@ document.addEventListener("DOMContentLoaded", () => {
             colF1.innerHTML += `
                 <div class="method-bar-wrap left">
                     <div class="method-bar red-bar" style="width:${w1}%">
-                        <span class="method-count">${v1 || 0}</span>
+                        <span class="method-count">${fmt(v1)}</span>
                     </div>
                 </div>`;
             colF2.innerHTML += `
                 <div class="method-bar-wrap right">
                     <div class="method-bar blue-bar" style="width:${w2}%">
-                        <span class="method-count">${v2 || 0}</span>
+                        <span class="method-count">${fmt(v2)}</span>
                     </div>
                 </div>`;
         });
@@ -422,11 +453,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---- Key Factors (NEW) ----
     const CATEGORY_COLORS = {
-        striking: "#ef4444",
-        grappling: "#22c55e",
-        physical: "#a855f7",
-        experience: "#f59e0b",
-        other: "#6b7280",
+        striking: "#56514a",
+        grappling: "#56514a",
+        physical: "#56514a",
+        experience: "#56514a",
+        other: "#56514a",
     };
 
     function renderKeyFactors(factors, f1Name, f2Name) {
@@ -449,14 +480,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="factor-cat" style="background: ${catColor}20; color: ${catColor}; border-color: ${catColor}40">${esc(factor.category)}</span>
                 </div>
                 <div class="factor-bottom">
-                    <span class="factor-val ${isF1 ? 'red-text' : ''}">${esc(String(factor.f1Value))}</span>
+                    <span class="factor-val ${isF1 ? 'red-text' : ''}">${fmt(factor.f1Value)}</span>
                     <div class="factor-bar-wrap">
                         <div class="factor-bar ${isF1 ? 'red-fill' : 'blue-fill'}" style="width:${barPct}%"></div>
                     </div>
-                    <span class="factor-val ${!isF1 ? 'blue-text' : ''}">${esc(String(factor.f2Value))}</span>
+                    <span class="factor-val ${!isF1 ? 'blue-text' : ''}">${fmt(factor.f2Value)}</span>
                 </div>
                 <div class="factor-adv ${isF1 ? 'red-text' : 'blue-text'}">
                     ${isF1 ? '\u25C0' : '\u25B6'} Favors ${esc(factor.advantage)}
+                    ${factor.imputed ? '<span class="imputed-note">Missing input; training median used</span>' : ''}
                 </div>
             `;
             container.appendChild(row);
@@ -504,13 +536,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ---- Model Breakdown (NEW) ----
-    const MODEL_DISPLAY = {
-        logistic_regression: "Logistic Regression",
-        random_forest: "Random Forest",
-        gradient_boosting: "Gradient Boosting",
-        ensemble: "Ensemble",
-    };
-
     function renderModelBreakdown(breakdown, f1Name, f2Name) {
         const container = document.getElementById("model-breakdown");
         container.innerHTML = "";
@@ -519,7 +544,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("models-f1-name").textContent = f1Name;
         document.getElementById("models-f2-name").textContent = f2Name;
 
-        const order = ["logistic_regression", "random_forest", "gradient_boosting", "ensemble"];
+        const order = [...Object.keys(breakdown).filter(key => key !== "ensemble"), ...("ensemble" in breakdown ? ["ensemble"] : [])];
 
         order.forEach(key => {
             const model = breakdown[key];
@@ -528,14 +553,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const f1Pct = (model.f1Prob * 100).toFixed(1);
             const f2Pct = (model.f2Prob * 100).toFixed(1);
             const isEnsemble = key === "ensemble";
-            const accText = model.accuracy ? `${(model.accuracy * 100).toFixed(1)}% acc` : "";
+
 
             const row = document.createElement("div");
             row.className = `model-row ${isEnsemble ? "model-ensemble" : ""}`;
             row.innerHTML = `
                 <div class="model-info">
                     <span class="model-name">${esc(MODEL_DISPLAY[key] || key)}</span>
-                    ${accText ? `<span class="model-acc">${accText}</span>` : ""}
+
                 </div>
                 <div class="model-bar-wrap">
                     <div class="model-bar">
@@ -579,8 +604,8 @@ document.addEventListener("DOMContentLoaded", () => {
             row.innerHTML = `
                 <div class="history-date">${dateStr}</div>
                 <div class="history-result">
-                    <span class="history-winner ${isF1Winner ? 'red-text' : isF2Winner ? 'blue-text' : ''}">${m.winner}</span>
-                    <span class="history-method">${methodParts.filter(Boolean).join(" \u00B7 ")}</span>
+                    <span class="history-winner ${isF1Winner ? 'red-text' : isF2Winner ? 'blue-text' : ''}">${esc(m.winner)}</span>
+                    <span class="history-method">${esc(methodParts.filter(Boolean).join(" \u00B7 "))}</span>
                 </div>
             `;
             container.appendChild(row);

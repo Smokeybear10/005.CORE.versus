@@ -469,7 +469,7 @@ input:focus-visible, textarea:focus-visible {
 }
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     border-left: 1px solid var(--rule);
 }
 .metric-cell {
@@ -930,4 +930,24 @@ footer a:hover { color: var(--accent); }
     .mast { padding: 1rem 1.5rem; }
     .mast-nav { gap: 1.1rem; font-size: 0.85rem; }
     .mast-brand { font-size: 1.2rem; }
+}
+
+.evaluation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+}
+.evaluation-table caption { text-align: left; margin-bottom: 0.75rem; color: var(--ink-mid); }
+.dark .evaluation-table caption { color: var(--paper); opacity: 0.75; }
+.evaluation-table th, .evaluation-table td { padding: 1rem 0.75rem; border-bottom: 1px solid var(--rule); text-align: right; }
+.evaluation-table th:first-child { text-align: left; padding-left: 0; }
+.evaluation-table thead th { font-size: 0.75rem; font-weight: 500; }
+.evaluation-table tbody th { font-weight: 500; }
+#model-info-status { margin-top: 1rem; color: var(--ink-mid); font-size: 0.875rem; }
+#evaluation, #main { scroll-margin-top: 5rem; }
+@media (max-width: 600px) {
+    .evaluation-table { font-size: 0.8rem; }
+    .evaluation-table th, .evaluation-table td { padding: 0.8rem 0.4rem; }
 }

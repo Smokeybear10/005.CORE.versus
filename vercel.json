@@ -1,26 +1,75 @@
 {
+  "installCommand": "",
   "buildCommand": "bash scripts/fetch-data.sh",
   "functions": {
     "api/index.py": {
-      "memory": 2048,
-      "maxDuration": 10
+      "maxDuration": 60
     }
   },
   "headers": [
     {
       "source": "/(.*\\.(?:css|js|svg|ico))",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     },
     {
       "source": "/(.*\\.html)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index" }
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/evaluation.json",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/research",
+      "destination": "/predict.html"
+    },
+    {
+      "source": "/results",
+      "destination": "/results.html"
+    },
+    {
+      "source": "/methodology",
+      "destination": "/about.html"
+    }
+  ],
+  "outputDirectory": "public",
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/predict.html",
+      "destination": "/research",
+      "permanent": true
+    },
+    {
+      "source": "/about.html",
+      "destination": "/methodology",
+      "permanent": true
+    },
+    {
+      "source": "/results.html",
+      "destination": "/results",
+      "permanent": true
+    }
   ]
 }
