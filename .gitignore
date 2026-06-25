@@ -8,8 +8,12 @@ __pycache__/
 .DS_Store
 .gstack/
 .claude/
+.env
+.env.*
+!.env.example
 
 # Runtime data — fetched at build time from 802-DATA.MMA Releases
 data/*
 !data/.gitkeep
+public/evaluation.json
 .vercel
